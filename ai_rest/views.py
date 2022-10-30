@@ -4,6 +4,7 @@ from django import http
 
 # Create your views here.
 from rest_framework import generics
+from ai_rest.models import PredictImage
 from ai_rest.serializers import PrecitSerializer
 import tensorflow as tf
 from rest_framework.response import Response
@@ -15,6 +16,8 @@ model = tf.keras.models.load_model("final.h5")
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 import os
+
+import json
 
 
 class PredictView(generics.CreateAPIView):
@@ -32,7 +35,10 @@ class PredictView(generics.CreateAPIView):
         image_arr = np.array(image)[np.newaxis, ...]
         predictions = model.predict(image_arr)
         prediction_num = np.argmax(predictions)
-
+        out_dict = {"request_result": str(prediction_num)}
+        out_json_str = json.dumps(out_dict)
+        PredictImage.objects.all().delete()
+        os.remove(image_path)
         return Response(
-            prediction_num, status=status.HTTP_201_CREATED, headers=headers
+            json.loads(out_json_str), status=status.HTTP_201_CREATED, headers=headers
         )

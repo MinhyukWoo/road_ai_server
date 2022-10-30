@@ -4,6 +4,11 @@ from ai_rest.models import PredictImage
 
 
 class PrecitSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = PredictImage
-        fields = ("image",)
+        fields = (
+            "id",
+            "image",
+        )
