@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # custom
     "ai_rest",
     "rest_framework",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # custom
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = "road_ai_server.urls"
@@ -130,3 +133,6 @@ MEDIA_URL = "/media/"
 
 import os
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+CORS_ORIGIN_WHITELIST = ['https://bitwise.ljlee37.com:8080', "http://localhost:3000"]
+CORS_ALLOW_CREDENTIALS = True

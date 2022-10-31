@@ -17,15 +17,7 @@ import os
 import json
 
 
-def get_class_to_sign():
-    with open("class_to_sign.json", "r") as file:
-        json_data = json.load(file)
-    out = {item["model_class_category"]: item["sign_category"] for item in json_data}
-    return out
-
-
 model = tf.keras.models.load_model("final.h5")
-class_to_sign = get_class_to_sign()
 
 
 class PredictView(generics.CreateAPIView):
@@ -47,8 +39,7 @@ class PredictView(generics.CreateAPIView):
 
         predictions = model.predict(test_image)
         prediction_num = np.argmax(predictions)
-        road_num = class_to_sign[prediction_num]
-        out_dict = {"request_result": road_num}
+        out_dict = {"request_result": prediction_num}
         out_json_str = json.dumps(out_dict)
         PredictImage.objects.all().delete()
         os.remove(image_path)
