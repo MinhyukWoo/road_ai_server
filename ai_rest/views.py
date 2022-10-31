@@ -39,7 +39,7 @@ class PredictView(generics.CreateAPIView):
 
         predictions = model.predict(test_image)
         prediction_num = np.argmax(predictions)
-        out_dict = {"request_result": prediction_num}
+        out_dict = {"request_result": int(prediction_num)}
         out_json_str = json.dumps(out_dict)
         PredictImage.objects.all().delete()
         os.remove(image_path)
