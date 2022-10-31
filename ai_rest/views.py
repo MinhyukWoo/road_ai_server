@@ -9,15 +9,23 @@ from ai_rest.serializers import PrecitSerializer
 import tensorflow as tf
 from rest_framework.response import Response
 
-from PIL import Image
 import numpy as np
 
-model = tf.keras.models.load_model("final.h5")
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser
 import os
 
 import json
+
+
+def get_class_to_sign():
+    with open("class_to_sign.json", "r") as file:
+        json_data = json.load(file)
+    out = {item["model_class_category"]: item["sign_category"] for item in json_data}
+    return out
+
+
+model = tf.keras.models.load_model("final.h5")
+class_to_sign = get_class_to_sign()
 
 
 class PredictView(generics.CreateAPIView):
@@ -31,11 +39,16 @@ class PredictView(generics.CreateAPIView):
         headers = self.get_success_headers(serializer.data)
 
         image_path = os.path.join("media", serializer.data["image"].split("/")[-1])
-        image = Image.open(image_path).resize((150, 150)).convert("RGB")
-        image_arr = np.array(image)[np.newaxis, ...]
-        predictions = model.predict(image_arr)
+
+        test_image = tf.keras.utils.load_img(image_path, target_size=(150, 150))
+        test_image = tf.keras.utils.img_to_array(test_image)
+        test_image = np.expand_dims(test_image, axis=0)
+        test_image /= 255.0
+
+        predictions = model.predict(test_image)
         prediction_num = np.argmax(predictions)
-        out_dict = {"request_result": str(prediction_num)}
+        road_num = class_to_sign[prediction_num]
+        out_dict = {"request_result": road_num}
         out_json_str = json.dumps(out_dict)
         PredictImage.objects.all().delete()
         os.remove(image_path)
